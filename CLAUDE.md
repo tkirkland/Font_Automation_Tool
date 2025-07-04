@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Custom Linux Install Tool that includes a comprehensive font archival system (`font.sh`). The project is structured as a Python package but currently contains primarily shell scripts for font management operations.
+This is a Font Automation Tool that provides a comprehensive font archival system (`font.sh`). The project is structured as a Python package but currently contains primarily shell scripts for font management operations.
 
 ## Key Components
 
