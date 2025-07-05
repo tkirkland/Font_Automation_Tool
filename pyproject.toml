@@ -1,5 +1,5 @@
 [project]
-name = "custom-linux-install-tool"
+name = "Font_Automation_Tool"
 version = "0.1.0"
 description = "Add your description here"
 requires-python = ">=3.12"

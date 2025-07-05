@@ -12,22 +12,22 @@ set -euo pipefail
 
 # Font type mappings
 declare -A font_type_map=(
-     ["ttf"]="truetype"
-     ["otf"]="opentype"
-     ["woff"]="webfonts"
-     ["woff2"]="webfonts"
-     ["pfb"]="type1"
-     ["pfa"]="type1"
-     ["pfm"]="type1"
+      ["ttf"]="truetype"
+      ["otf"]="opentype"
+      ["woff"]="webfonts"
+      ["woff2"]="webfonts"
+      ["pfb"]="type1"
+      ["pfa"]="type1"
+      ["pfm"]="type1"
 )
 
 # Cleanup function
 cleanup() {
     rm -rf "$TEMP_PROCESSING_DIR"
-    if [[ -d "$TEMP_EXTRACT_DIR" ]]; then
+    if [[ -d $TEMP_EXTRACT_DIR   ]]; then
         print_color "$YELLOW" "Cleaning up temporary extraction directory..."
         rm -rf "$TEMP_EXTRACT_DIR"
-  fi
+    fi
 }
 
 # Function to print colored output
@@ -81,17 +81,17 @@ detect_distro() {
     if [[ -f /etc/os-release ]]; then
         source /etc/os-release
         echo "$ID"
-  elif   [[ -f /etc/debian_version ]]; then
+    elif [[ -f /etc/debian_version ]]; then
         echo "debian"
-  elif   [[ -f /etc/redhat-release ]]; then
+    elif [[ -f /etc/redhat-release ]]; then
         echo "rhel"
-  elif   [[ -f /etc/arch-release ]]; then
+    elif [[ -f /etc/arch-release ]]; then
         echo "arch"
-  elif   [[ -f /etc/alpine-release ]]; then
+    elif [[ -f /etc/alpine-release ]]; then
         echo "alpine"
-  else
+    else
         echo "unknown"
-  fi
+    fi
 }
 
 # Function to get package manager
@@ -117,7 +117,7 @@ get_package_manager() {
         *)
             echo "unknown"
             ;;
-  esac
+    esac
 }
 
 # Function to update package lists
@@ -146,7 +146,7 @@ update_package_lists() {
         *)
             return 1
             ;;
-  esac
+    esac
 }
 
 # Function to install a single package
@@ -176,7 +176,7 @@ install_package() {
         *)
             return 1
             ;;
-  esac
+    esac
 }
 
 # Function to map commands to packages
@@ -203,7 +203,7 @@ get_package_name() {
                 *)
                     echo "p7zip"
                     ;;
-      esac
+        esac
             ;;
         "unrar")
             echo "unrar"
@@ -216,7 +216,7 @@ get_package_name() {
                 *)
                     echo "python3"
                     ;;
-      esac
+        esac
             ;;
         "git-lfs")
             echo "git-lfs"
@@ -224,7 +224,7 @@ get_package_name() {
         *)
             echo "$command"
             ;;
-  esac
+    esac
 }
 
 # Function to check dependencies
@@ -242,8 +242,8 @@ check_dependencies() {
     for cmd in "${critical_commands[@]}"; do
         if ! command -v "$cmd" > /dev/null 2>&1; then
             missing_critical+=("$cmd")
-    fi
-  done
+        fi
+    done
 
     # Optional dependencies
     local optional_commands=("7z" "unzip" "unrar" "python3" "git-lfs")
@@ -251,15 +251,15 @@ check_dependencies() {
     for cmd in "${optional_commands[@]}"; do
         if ! command -v "$cmd" > /dev/null 2>&1; then
             missing_optional+=("$cmd")
-    fi
-  done
+        fi
+    done
 
     # Handle missing critical dependencies
     if [[ ${#missing_critical[@]} -gt 0 ]]; then
         print_color "$RED" "❌ Missing critical dependencies:"
         for dep in "${missing_critical[@]}"; do
             print_color "$RED" "   - $dep"
-    done
+        done
 
         # Get packages to install
         local packages_to_install=()
@@ -268,8 +268,8 @@ check_dependencies() {
             pkg=$(get_package_name "$cmd")
             if [[ ! " ${packages_to_install[*]} " =~ \ $pkg\  ]]; then
                 packages_to_install+=("$pkg")
-      fi
-    done
+            fi
+        done
 
         print_color "$YELLOW" "Required packages: ${packages_to_install[*]}"
 
@@ -284,14 +284,14 @@ check_dependencies() {
                 for pkg in "${packages_to_install[@]}"; do
                     if install_package "$pkg"; then
                         print_color "$GREEN" "  ✅ $pkg installed"
-          else
+                    else
                         print_color "$RED" "  ❌ Failed to install $pkg"
-          fi
-        done
-      fi
-    else
+                    fi
+                done
+            fi
+        else
             print_color "$YELLOW" "Run with sudo to enable automatic installation"
-    fi
+        fi
 
         # Re-check critical dependencies
         local still_missing=false
@@ -299,22 +299,22 @@ check_dependencies() {
             if ! command -v "$cmd" > /dev/null 2>&1; then
                 still_missing=true
                 break
-      fi
-    done
+            fi
+        done
 
         if [[ $still_missing == "true"   ]]; then
             print_color "$RED" "Cannot continue without critical dependencies"
             return 1
+        fi
     fi
-  fi
 
     # Handle optional dependencies
     if [[ ${#missing_optional[@]} -gt 0 ]]; then
         print_color "$YELLOW" "⚠️  Missing optional dependencies:"
         for dep in "${missing_optional[@]}"; do
             print_color "$YELLOW" "   - $dep"
-    done
-  fi
+        done
+    fi
 
     print_color "$GREEN" "✅ Dependency check complete"
     return 0
@@ -324,32 +324,32 @@ check_dependencies() {
 is_windows_or_wsl() {
     if [[ -n ${WSL_DISTRO_NAME:-}   ]] || [[ "$(uname -r)" == *microsoft* ]] || [[ "$(uname -r)" == *WSL* ]]; then
         return 0
-  fi
+    fi
     return 1
 }
 
 # Function to validate GitHub URL
 validate_github_url() {
     local url="$1"
-    if [[ "$url" =~ ^https://github\.com/[^/]+/[^/]+/?$ ]]; then
+    if [[ $url =~ ^https://github\.com/[^/]+/[^/]+/?$   ]]; then
         return 0
-  elif   [[ "$url" =~ ^[^/]+/[^/]+$ ]]; then
+    elif [[ $url =~ ^[^/]+/[^/]+$   ]]; then
         return 0
-  else
+    else
         return 1
-  fi
+    fi
 }
 
 # Function to normalize GitHub URL
 normalize_github_url() {
     local url="$1"
-    if [[ "$url" =~ ^https://github\.com/(.+)$ ]]; then
+    if [[ $url =~ ^https://github\.com/(.+)$   ]]; then
         echo "https://github.com/${BASH_REMATCH[1]}"
-  elif   [[ "$url" =~ ^[^/]+/[^/]+$ ]]; then
+    elif [[ $url =~ ^[^/]+/[^/]+$   ]]; then
         echo "https://github.com/$url"
-  else
+    else
         echo "$url"
-  fi
+    fi
 }
 
 # Function to download fonts from GitHub
@@ -365,23 +365,23 @@ download_github_fonts() {
     if ! validate_github_url "$repo_url"; then
         print_color "$RED" "Error: Invalid GitHub repository URL: $repo_url"
         return 1
-  fi
+    fi
 
     # Normalize URL
     repo_url=$(normalize_github_url "$repo_url")
 
     # Remove existing clone directory if it exists
-    if [[ -d "$clone_dir" ]]; then
+    if [[ -d $clone_dir   ]]; then
         print_color "$YELLOW" "Removing existing clone directory..."
         rm -rf "$clone_dir"
-  fi
+    fi
 
     # Clone repository
     print_color "$CYAN" "Cloning repository..."
     if ! git clone "$repo_url" "$clone_dir"; then
         print_color "$RED" "Error: Failed to clone repository"
         return 1
-  fi
+    fi
 
     # Check if Git LFS is needed
     if [[ -f "$clone_dir/.gitattributes" ]] && grep -q "lfs" "$clone_dir/.gitattributes"; then
@@ -390,16 +390,16 @@ download_github_fonts() {
             cd "$clone_dir"
             git lfs pull || true
             cd - > /dev/null
-    else
+        else
             print_color "$YELLOW" "Warning: Git LFS not installed, some files may not be downloaded"
+        fi
     fi
-  fi
 
     # Count downloaded fonts
     local font_count=0
     while IFS= read -r -d '' font_file; do
         font_count=$((font_count + 1))
-  done   < <(find "$clone_dir" -type f \( -iname "*.ttf" -o -iname "*.otf" -o -iname "*.woff" -o -iname "*.woff2" -o -iname "*.pfb" -o -iname "*.pfa" -o -iname "*.pfm" \) -print0 2> /dev/null || true)
+    done < <(find "$clone_dir" -type f \( -iname "*.ttf" -o -iname "*.otf" -o -iname "*.woff" -o -iname "*.woff2" -o -iname "*.pfb" -o -iname "*.pfa" -o -iname "*.pfm" \) -print0 2> /dev/null || true)
 
     print_color "$GREEN" "Downloaded $font_count font files from GitHub"
     return 0
@@ -414,29 +414,29 @@ is_nerd_font() {
     if command -v fc-query > /dev/null 2>&1; then
         local charset
         charset=$(fc-query -f "%{charset}" "$font_file" 2> /dev/null || true)
-        if [[ -n "$charset" ]]; then
+        if [[ -n $charset   ]]; then
             # Look for characteristic Nerd Font ranges (E000-F8FF)
             if echo "$charset" | grep -qE "(e[0-9a-f]{3}|f[0-7][0-9a-f]{2})"; then
                 has_nerd_glyphs=true
-      fi
+            fi
+        fi
     fi
-  fi
 
     # Method 2: Check filename and family name for Nerd Font indicators
-    if [[ "$has_nerd_glyphs" == "false" ]]; then
+    if [[ $has_nerd_glyphs == "false"   ]]; then
         local filename
         filename=$(basename "$font_file")
         local family_from_file=""
 
         if command -v fc-query > /dev/null 2>&1; then
             family_from_file=$(fc-query -f "%{family[0]}" "$font_file" 2> /dev/null || true)
-    fi
+        fi
 
-        if [[ $filename =~ [Nn]erd|NF|[Pp]owerline   ]] \
-                                                        || [[ $family_from_file =~ [Nn]erd|NF|[Pp]owerline ]]; then
+        if [[ $filename =~ [Nn]erd|NF|[Pp]owerline   ]] ||
+                                                           [[ $family_from_file =~ [Nn]erd|NF|[Pp]owerline ]]; then
             has_nerd_glyphs=true
+        fi
     fi
-  fi
 
     echo "$has_nerd_glyphs"
 }
@@ -460,18 +460,18 @@ sanitize_font_name() {
         prev_name="$name"
         if [[ $name =~ ^(.+)\1+$   ]]; then
             name="${BASH_REMATCH[1]}"
-    fi
-  done
+        fi
+    done
 
     # Ensure we have something
     if [[ -z $name   ]]; then
         name="unknown"
-  fi
+    fi
 
     # Limit length
     if [[ ${#name} -gt 50 ]]; then
         name="${name:0:50}"
-  fi
+    fi
 
     echo "$name"
 }
@@ -490,8 +490,8 @@ get_font_family() {
         if [[ -n $raw_family && $raw_family != "Unknown Family"     ]]; then
             raw_family=$(echo "$raw_family" | sed -E 's/\s*(Nerd Font|NF|Powerline)\s*//gi' | sed -E 's/\s+/ /g' | sed 's/^ *//;s/ *$//')
             family=$(sanitize_font_name "$raw_family")
+        fi
     fi
-  fi
 
     # Method 2: Fallback to filename parsing
     if [[ -z $family   ]]; then
@@ -503,33 +503,33 @@ get_font_family() {
         local style_keywords="regular|normal|bold|italic|light|medium|heavy|black|thin|condensed|extended|oblique|roman"
         raw_family=$(echo "$basename" | sed -E "s/[-_[:space:]]*($style_keywords).*//i")
 
-        if [[ "$raw_family" == "$basename" ]]; then
+        if [[ $raw_family == "$basename"   ]]; then
             raw_family=$(echo "$basename" | sed -E 's/[-_[:space:]].*//')
-    fi
+        fi
 
-        if [[ -z "$raw_family" ]]; then
+        if [[ -z $raw_family   ]]; then
             raw_family="$basename"
-    fi
+        fi
 
         family=$(sanitize_font_name "$raw_family")
-  fi
+    fi
 
     # Add NF suffix for Nerd Fonts
-    if [[ "$is_nerd" == "true" ]]; then
+    if [[ $is_nerd == "true"   ]]; then
         family=$(echo "$family" | sed -E 's/(nf|NF)+$//i')
-        if [[ ! "$family" =~ (nf|NF)$ ]]; then
+        if [[ ! $family =~ (nf|NF)$   ]]; then
             family="${family}NF"
+        fi
     fi
-  fi
 
     # Final fallback
-    if [[ -z "$family" ]] || [[ "$family" == "NF" ]] || [[ "$family" == "nf" ]]; then
-        if [[ "$is_nerd" == "true" ]]; then
+    if [[ -z $family   ]] || [[ $family == "NF"   ]] || [[ $family == "nf"   ]]; then
+        if [[ $is_nerd == "true"   ]]; then
             family="unknownNF"
-    else
+        else
             family="unknown"
+        fi
     fi
-  fi
 
     echo "$family"
 }
@@ -565,16 +565,16 @@ extract_archives() {
             *.zip)
                 if command -v unzip > /dev/null 2>&1; then
                     unzip -q "$archive" -d "$extract_subdir" || print_color "$YELLOW" "Warning: Failed to extract $archive"
-        else
+            else
                     print_color "$YELLOW" "Warning: unzip not available, skipping $archive"
-        fi
+            fi
                 ;;
             *.7z)
                 if command -v 7z > /dev/null 2>&1; then
                     7z x "$archive" -o"$extract_subdir" -y > /dev/null || print_color "$YELLOW" "Warning: Failed to extract $archive"
-        else
+            else
                     print_color "$YELLOW" "Warning: 7z not available, skipping $archive"
-        fi
+            fi
                 ;;
             *.tar.gz | *.tgz)
                 tar -xzf "$archive" -C "$extract_subdir" || print_color "$YELLOW" "Warning: Failed to extract $archive"
@@ -588,19 +588,19 @@ extract_archives() {
             *.rar)
                 if command -v unrar > /dev/null 2>&1; then
                     unrar x "$archive" "$extract_subdir/" || print_color "$YELLOW" "Warning: Failed to extract $archive"
-        else
+            else
                     print_color "$YELLOW" "Warning: unrar not available, skipping $archive"
-        fi
+            fi
                 ;;
             *)
                 print_color "$YELLOW" "Warning: Unknown archive format: $archive"
                 ;;
-    esac
-  done   < <(find "$CURRENT_DIR" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.7z" -o -iname "*.tar.gz" -o -iname "*.tgz" -o -iname "*.tar.bz2" -o -iname "*.tbz2" -o -iname "*.tar.xz" -o -iname "*.rar" \) -print0 2> /dev/null || true)
+        esac
+    done < <(find "$CURRENT_DIR" -maxdepth 1 -type f \( -iname "*.zip" -o -iname "*.7z" -o -iname "*.tar.gz" -o -iname "*.tgz" -o -iname "*.tar.bz2" -o -iname "*.tbz2" -o -iname "*.tar.xz" -o -iname "*.rar" \) -print0 2> /dev/null || true)
 
-    if [[ "$archives_found" == "false" ]]; then
+    if [[ $archives_found == "false"   ]]; then
         print_color "$GREEN" "No archives found in current directory."
-  fi
+    fi
 }
 
 # Function to collect all font files
@@ -614,19 +614,19 @@ collect_fonts() {
     find "$CURRENT_DIR" -maxdepth 1 -type f \( -iname "*.ttf" -o -iname "*.otf" -o -iname "*.woff" -o -iname "*.woff2" -o -iname "*.pfb" -o -iname "*.pfa" -o -iname "*.pfm" \) -print >> "$fonts_list" 2> /dev/null || true
 
     # Collect fonts from extracted archives
-    if [[ -d "$TEMP_EXTRACT_DIR" ]]; then
+    if [[ -d $TEMP_EXTRACT_DIR   ]]; then
         find "$TEMP_EXTRACT_DIR" -type f \( -iname "*.ttf" -o -iname "*.otf" -o -iname "*.woff" -o -iname "*.woff2" -o -iname "*.pfb" -o -iname "*.pfa" -o -iname "*.pfm" \) -print >> "$fonts_list" 2> /dev/null || true
-  fi
+    fi
 
     # Collect fonts from GitHub clone directory
     if [[ -d $GITHUB_CLONE_DIR   ]]; then
         find "$GITHUB_CLONE_DIR" -type f \( -iname "*.ttf" -o -iname "*.otf" -o -iname "*.woff" -o -iname "*.woff2" -o -iname "*.pfb" -o -iname "*.pfa" -o -iname "*.pfm" \) -print >> "$fonts_list" 2> /dev/null || true
-  fi
+    fi
 
     local font_count=0
     if [[ -f $fonts_list   ]]; then
         font_count=$(wc -l < "$fonts_list" 2> /dev/null || echo "0")
-  fi
+    fi
 
     print_color "$GREEN" "Found $font_count font files to process."
     echo "$fonts_list"
@@ -641,12 +641,12 @@ organize_fonts() {
         print_color "$RED" "This operation requires root privileges to organize system fonts."
         print_color "$YELLOW" "Run with: sudo $0 organize"
         return 1
-  fi
+    fi
 
     if [[ ! -f $fonts_list   ]]; then
         print_color "$RED" "Error: Font list file not found: $fonts_list"
         return 1
-  fi
+    fi
 
     local organized_count=0
     local total_fonts
@@ -655,7 +655,7 @@ organize_fonts() {
     if [[ $total_fonts -eq 0   ]]; then
         print_color "$YELLOW" "No fonts to organize."
         return 0
-  fi
+    fi
 
     print_color "$GREEN" "Processing $total_fonts font files..."
 
@@ -679,32 +679,32 @@ organize_fonts() {
         print_color "$CYAN" "  Font family: '$family'"
         if [[ $is_nerd == "true"   ]]; then
             print_color "$YELLOW" "  🎯 Nerd Font detected!"
-    fi
+        fi
         print_color "$CYAN" "  Target: $font_type/$family/"
 
         # Create directory if it doesn't exist
         if ! mkdir -p "$target_dir"; then
             print_color "$RED" "  Failed to create directory: $target_dir"
             continue
-    fi
+        fi
 
         # Check if file already exists
         if [[ -f $target_file   ]]; then
             if cmp -s "$font_file" "$target_file"; then
                 print_color "$YELLOW" "  Already exists (identical): $target_file"
-      else
+            else
                 print_color "$YELLOW" "  Already exists (different): $target_file"
-      fi
-    else
+            fi
+        else
             # Copy font to target location
             if cp "$font_file" "$target_file"; then
                 print_color "$GREEN" "  Organized: $target_file"
                 organized_count=$((organized_count + 1))
-      else
+            else
                 print_color "$RED" "  Failed to copy: $font_file"
-      fi
-    fi
-  done   < "$fonts_list"
+            fi
+        fi
+    done < "$fonts_list"
 
     print_color "$GREEN" "Organized $organized_count font files."
 }
@@ -717,12 +717,12 @@ update_font_cache() {
         print_color "$CYAN" "Updating font cache (this may take a moment)..."
         if fc-cache -f > /dev/null 2>&1; then
             print_color "$GREEN" "Font cache updated successfully."
-    else
+        else
             print_color "$YELLOW" "Font cache update completed with warnings."
-    fi
-  else
+        fi
+    else
         print_color "$YELLOW" "fc-cache not available. Font cache not updated."
-  fi
+    fi
 }
 
 # Function to run full process
@@ -737,8 +737,8 @@ run_full_process() {
         if ! download_github_fonts "$repo_url"; then
             print_color "$RED" "Error: Failed to download fonts from GitHub"
             return 1
+        fi
     fi
-  fi
 
     # Step 2: Extract archives
     extract_archives
@@ -750,10 +750,10 @@ run_full_process() {
     # Step 4: Organize fonts (requires root)
     if [[ $EUID -eq 0 ]]; then
         organize_fonts "$fonts_list"
-  else
+    else
         print_color "$YELLOW" "Skipping organization (requires root privileges)"
         print_color "$YELLOW" "Run with sudo to organize fonts into system directories"
-  fi
+    fi
 
     # Step 5: Update font cache
     update_font_cache
@@ -772,15 +772,15 @@ main() {
 
     # TODO: Implement scan_windows() function to use this array
     default_windows_fonts=(
-    "arial" "calibri" "cambria" "candara" "comic sans ms" "consolas" "constantia"
-    "corbel" "courier new" "ebrima" "franklin gothic" "gabriola" "gadugi"
-    "georgia" "impact" "javanese text" "leelawadee ui" "lucida console"
-    "lucida sans unicode" "malgun gothic" "microsoft sans serif" "mingliu"
-    "ms gothic" "ms pgothic" "ms ui gothic" "mv boli" "myanmar text" "nirmala ui"
-    "palatino linotype" "segoe mdl2 assets" "segoe print" "segoe script"
-    "segoe ui" "simsun" "sitka" "sylfaen" "symbol" "tahoma" "times new roman"
-    "trebuchet ms" "verdana" "webdings" "wingdings" "yu gothic"
-)
+        "arial" "calibri" "cambria" "candara" "comic sans ms" "consolas" "constantia"
+        "corbel" "courier new" "ebrima" "franklin gothic" "gabriola" "gadugi"
+        "georgia" "impact" "javanese text" "leelawadee ui" "lucida console"
+        "lucida sans unicode" "malgun gothic" "microsoft sans serif" "mingliu"
+        "ms gothic" "ms pgothic" "ms ui gothic" "mv boli" "myanmar text" "nirmala ui"
+        "palatino linotype" "segoe mdl2 assets" "segoe print" "segoe script"
+        "segoe ui" "simsun" "sitka" "sylfaen" "symbol" "tahoma" "times new roman"
+        "trebuchet ms" "verdana" "webdings" "wingdings" "yu gothic"
+    )
     # Colors for output
     RED='\033[0;31m'
     GREEN='\033[0;32m'
@@ -798,13 +798,13 @@ main() {
     GITHUB_CLONE_DIR="$CURRENT_DIR/.github_fonts"
     CONFIG_FILE="$HOME/.font_archiver_config"
 
-  # Run the main function if a script is executed directly
-  if [[ ${BASH_SOURCE[0]} != "${0}" ]]; then
-    # Show a welcome message
-    exit 0
-  else
-    show_welcome
-  fi
+    # Run the main function if a script is executed directly
+    if [[ ${BASH_SOURCE[0]} != "${0}" ]]; then
+        # Show a welcome message
+        exit 0
+    else
+        show_welcome
+    fi
     # Parse command line arguments
     while [[ $# -gt 0 ]]; do
         case $1 in
@@ -846,17 +846,17 @@ main() {
                 ;;
             *)
                 # Treat unknown arguments as potential directory paths
-                if [[ -d "$1" ]]; then
+                if [[ -d $1   ]]; then
                     CURRENT_DIR="$1"
                     shift
-        else
+            else
                     print_color "$RED" "Unknown option: $1"
                     show_help
                     exit 1
-        fi
+            fi
                 ;;
-    esac
-  done
+        esac
+    done
 
     # Set defaults
     token_file="${token_file:-$HOME/.github_token}"
@@ -868,16 +868,16 @@ main() {
         print_color "$RED" "❌ Critical dependencies missing. Cannot continue."
         print_color "$YELLOW" "💡 Tip: Run with sudo to enable automatic installation"
         exit 1
-  fi
+    fi
 
     # Execute command
     case "$command" in
         "download-github")
-            if [[ -z "$repo_url" ]]; then
+            if [[ -z $repo_url   ]]; then
                 print_color "$RED" "Error: Repository URL required for download-github command"
                 print_color "$YELLOW" "Usage: $0 download-github -r <repo_url>"
                 exit 1
-      fi
+        fi
             download_github_fonts "$repo_url"
             ;;
         "organize")
@@ -898,7 +898,7 @@ main() {
             show_help
             exit 1
             ;;
-  esac
+    esac
 }
 
 # Function to display welcome message

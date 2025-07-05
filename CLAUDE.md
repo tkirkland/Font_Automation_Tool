@@ -8,7 +8,7 @@ This is a Font Automation Tool that provides a comprehensive font archival syste
 
 ## Key Components
 
-### font.sh - Unified Font Archival System
+### fat.sh - Font Archival Tool
 - **Purpose**: Downloads, organizes, and manages fonts from GitHub repositories
 - **Key Features**:
   - Downloads fonts from GitHub repos (with Git LFS support)
